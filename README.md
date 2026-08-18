@@ -167,6 +167,12 @@ If a saved auth state is not available and the required secret(s) for whichever 
 
 The workflow is at [.github/workflows/portfolio-value-tests.yml](.github/workflows/portfolio-value-tests.yml).
 
+### Runner image
+
+The job runs inside the [`mcr.microsoft.com/playwright:v1.59.1-noble`](https://mcr.microsoft.com/en-us/artifact/mar/playwright/about) container, which ships with matching Playwright browsers pre-installed — this replaces the separate `npx playwright install --with-deps` step, which was slow and occasionally hung downloading browser/OS dependencies on a plain `ubuntu-latest` runner.
+
+> **Keep versions in sync:** the image tag's Playwright version must match the `@playwright/test` version pinned in [package.json](./package.json) (currently `1.59.1`, pinned exactly rather than with `^`). When bumping Playwright locally, update both together — `npm install @playwright/test@<version>` and the `image:` tag in the workflow — otherwise the browsers baked into the image won't match what the npm package expects.
+
 ### Triggering manually
 
 Go to **Actions → Portfolio Value Tests → Run workflow** in the GitHub UI. You can optionally override `BASE_URL` for a different environment.

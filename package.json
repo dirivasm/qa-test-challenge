@@ -9,7 +9,7 @@
     "auth:save": "playwright test tests/auth.setup.ts --headed --project=setup"
   },
   "dependencies": {
-    "@playwright/test": "^1.49.0",
+    "@playwright/test": "1.59.1",
     "dotenv": "^16.4.7",
     "imapflow": "^1.7.1",
     "mailparser": "^3.9.15",

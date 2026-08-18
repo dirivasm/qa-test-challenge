@@ -12,6 +12,11 @@ jobs:
   test:
     name: Run acceptance tests (headless)
     runs-on: ubuntu-latest
+    # Pre-built image with matching Playwright + browsers already installed, so we skip the
+    # slow/flaky "npx playwright install --with-deps" step entirely. The tag's Playwright
+    # version must match the @playwright/test version pinned in package.json.
+    container:
+      image: mcr.microsoft.com/playwright:v1.59.1-noble
 
     steps:
       - name: Checkout repository
@@ -25,9 +30,6 @@ jobs:
 
       - name: Install npm dependencies
         run: npm ci
-
-      - name: Install Playwright browser
-        run: npx playwright install chromium --with-deps
 
       - name: Run tests
         env:
