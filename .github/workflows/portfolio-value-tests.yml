@@ -12,6 +12,7 @@ jobs:
   test:
     name: Run acceptance tests (headless)
     runs-on: ubuntu-latest
+    environment: TEST
     # Pre-built image with matching Playwright + browsers already installed, so we skip the
     # slow/flaky "npx playwright install --with-deps" step entirely. The tag's Playwright
     # version must match the @playwright/test version pinned in package.json.
