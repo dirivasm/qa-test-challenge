@@ -56,9 +56,9 @@ Open `.env` and fill in:
 | `USERNAME` | ✅ | Account email or username |
 | `PASSWORD` | ✅ | Account password |
 | `EXPECTED_PORTFOLIO_VALUE` | ❌ | If set, the test also asserts the portfolio equals this exact amount (e.g. `0` for a zero-balance account). Leave blank to skip exact-match assertion. |
-| `EMAIL` | ❌ | Gmail address to poll over IMAP for the device-approval email. Only needed if the approval gate appears during `npm run auth:save`. |
-| `GMAIL_APP_PASSWORD` | ❌ | A [Gmail App Password](https://myaccount.google.com/apppasswords) (16 chars, **not** your regular Gmail password) used to authenticate the IMAP connection. Requires 2-Step Verification enabled on the Google account. |
-| `TOTP_PASSKEY` | ❌ | The base32 authenticator-app secret (the long setup key shown next to the QR code when 2FA was enabled — not a 6-digit code). Only needed if the authenticator-app 2FA prompt appears during `npm run auth:save`. |
+| `EMAIL` | ✅ | Gmail address to poll over IMAP for the device-approval email. Only needed if the approval gate appears during `npm run auth:save`. |
+| `GMAIL_APP_PASSWORD` | ✅ | A [Gmail App Password](https://myaccount.google.com/apppasswords) (16 chars, **not** your regular Gmail password) used to authenticate the IMAP connection. Requires 2-Step Verification enabled on the Google account. |
+| `TOTP_PASSKEY` | ✅ | The base32 authenticator-app secret (the long setup key shown next to the QR code when 2FA was enabled — not a 6-digit code). Only needed if the authenticator-app 2FA prompt appears during `npm run auth:save`. |
 
 > **Security:** `.env` is listed in `.gitignore` and will never be committed. Never commit real credentials.
 
