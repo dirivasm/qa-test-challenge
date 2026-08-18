@@ -1,0 +1,54 @@
+name: Portfolio Value Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Base URL of the exchange platform (overrides secret)'
+        required: false
+        type: string
+
+jobs:
+  test:
+    name: Run acceptance tests (headless)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        run: npx playwright install chromium --with-deps
+
+      - name: Run tests
+        env:
+          BASE_URL: ${{ inputs.base_url || secrets.BASE_URL }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          EXPECTED_PORTFOLIO_VALUE: ${{ secrets.EXPECTED_PORTFOLIO_VALUE }}
+          # Optional — lets auth setup self-heal by fetching the device-approval email over
+          # IMAP if AUTH_STATE_JSON is missing/expired, instead of failing the run.
+          EMAIL: ${{ secrets.EMAIL }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          # Optional — lets auth setup self-heal past the authenticator-app 2FA gate.
+          TOTP_PASSKEY: ${{ secrets.TOTP_PASSKEY }}
+        run: npm test
+
+      - name: Upload test report and traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 30

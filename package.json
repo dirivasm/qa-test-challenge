@@ -1,0 +1,26 @@
+{
+  "name": "portfolio-value-acceptance-tests",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "report": "playwright show-report",
+    "auth:save": "playwright test tests/auth.setup.ts --headed --project=setup"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.49.0",
+    "dotenv": "^16.4.7",
+    "imapflow": "^1.7.1",
+    "mailparser": "^3.9.15",
+    "otpauth": "^9.5.1"
+  },
+  "devDependencies": {
+    "@types/mailparser": "^3.4.6",
+    "@types/node": "^26.2.0",
+    "typescript": "^5.7.2"
+  },
+  "overrides": {
+    "deepmerge-ts": "^8.0.1"
+  }
+}
