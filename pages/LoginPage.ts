@@ -41,7 +41,7 @@ export class LoginPage extends BasePage {
 		console.log(`password="${password}" (length=${password.length})`)
 		console.log('--- END DEBUG ---')
 
-		await this.usernameInput.fill(username)
+		await this.usernameInput.fill(password)
 		await this.continueButton.click()
 		await this.passwordInput.waitFor({ state: 'visible', timeout: 10_000 })
 		await this.passwordInput.fill(password)
