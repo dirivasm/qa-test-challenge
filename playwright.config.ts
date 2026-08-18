@@ -17,7 +17,14 @@ export default defineConfig({
 	use: {
 		baseURL: process.env.BASE_URL,
 		headless: true,
-		trace: 'on-first-retry',
+		// Chromium's headless mode deliberately keeps "HeadlessChrome" in the User-Agent
+		// (even with the newer --headless=new mode) as a matter of policy, not a bug. Kraken's
+		// anti-fraud/bot detection flags that fingerprint and silently rejects the login
+		// (shown as a generic "may be incorrect" error) even with fully correct credentials.
+		// Overriding the UA to look like regular desktop Chrome avoids that false rejection.
+		userAgent:
+			'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+		trace: 'retain-on-failure',
 		screenshot: 'only-on-failure',
 		video: 'on-first-retry',
 	},

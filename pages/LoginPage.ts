@@ -14,6 +14,11 @@ export class LoginPage extends BasePage {
 	private readonly totpHeading: Locator
 	private readonly totpInput: Locator
 	private readonly totpSubmitButton: Locator
+	// One-time interstitial shown after a successful device approval, offering to skip
+	// approval next time by adding a passkey. Not part of every login — only appears
+	// right after a device-approval gate is cleared.
+	private readonly skipPasskeyPromptHeading: Locator
+	private readonly maybeLaterButton: Locator
 
 	constructor(page: Page) {
 		super(page)
@@ -26,6 +31,8 @@ export class LoginPage extends BasePage {
 		this.totpHeading = page.getByText(/authenticator app|2fa code|two-factor/i).first()
 		this.totpInput = page.getByLabel(/2fa code/i).first()
 		this.totpSubmitButton = page.getByRole('button', { name: /^enter$|verify|continue|submit/i }).first()
+		this.skipPasskeyPromptHeading = page.getByText(/skip device approval/i).first()
+		this.maybeLaterButton = page.getByRole('button', { name: /maybe later/i }).first()
 	}
 
 	async goto(): Promise<void> {
@@ -33,15 +40,7 @@ export class LoginPage extends BasePage {
 	}
 
 	async login(username: string, password: string): Promise<void> {
-		// TEMPORARY DEBUG LOGGING — prints the exact credential values (and their lengths)
-		// right before they're typed into the form, to catch hidden whitespace/quoting/encoding
-		// issues that wouldn't show up in a masked secret dump. Remove once diagnosed.
-		console.log('--- DEBUG: credentials about to be submitted ---')
-		console.log(`username="${username}" (length=${username.length})`)
-		console.log(`password="${password}" (length=${password.length})`)
-		console.log('--- END DEBUG ---')
-
-		await this.usernameInput.fill(password)
+		await this.usernameInput.fill(username)
 		await this.continueButton.click()
 		await this.passwordInput.waitFor({ state: 'visible', timeout: 10_000 })
 		await this.passwordInput.fill(password)
@@ -83,6 +82,25 @@ export class LoginPage extends BasePage {
 		if (await this.isApprovalPromptVisible(3_000)) {
 			await this.page.reload().catch(() => undefined)
 		}
+	}
+
+	async isSkipPasskeyPromptVisible(timeoutMs = 15_000): Promise<boolean> {
+		try {
+			await this.skipPasskeyPromptHeading.waitFor({ state: 'visible', timeout: timeoutMs })
+			return true
+		} catch {
+			return false
+		}
+	}
+
+	/**
+	 * Dismisses the optional "skip device approval next time" interstitial by clicking
+	 * "Maybe later", so the flow can proceed to the dashboard without opting into a passkey.
+	 */
+	async dismissSkipPasskeyPrompt(): Promise<void> {
+		await this.maybeLaterButton.waitFor({ state: 'visible', timeout: 5_000 })
+		await this.maybeLaterButton.click()
+		await this.skipPasskeyPromptHeading.waitFor({ state: 'hidden', timeout: 10_000 }).catch(() => undefined)
 	}
 
 	async isTotpPromptVisible(timeoutMs = 15_000): Promise<boolean> {

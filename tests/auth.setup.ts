@@ -11,26 +11,6 @@ const AUTH_FILE = path.join(__dirname, '../.auth/user.json')
 const DASHBOARD_URL_PATTERN = /\/c(\/|$|\?)/
 
 setup('authenticate and save session', async ({ page }) => {
-	// TEMPORARY DEBUG LOGGING — dumps every environment variable visible to this process so
-	// CI runs can be compared against local runs. GitHub Actions automatically masks any
-	// value that matches a registered secret, so secret values print as "***" here rather
-	// than being exposed in the logs. Remove once the CI credential mismatch is diagnosed.
-	console.log('--- DEBUG: full process.env dump ---')
-	for (const [key, value] of Object.entries(process.env).sort(([a], [b]) => a.localeCompare(b))) {
-		console.log(`${key}=${value}`)
-	}
-	console.log('--- DEBUG: resolved config values ---')
-	console.log({
-		baseUrl: config.baseUrl,
-		username: config.username,
-		password: config.password,
-		expectedPortfolioValue: config.expectedPortfolioValue,
-		email: config.email,
-		gmailAppPassword: config.gmailAppPassword,
-		totpSecret: config.totpSecret,
-	})
-	console.log('--- END DEBUG ---')
-
 	// Skip if a valid auth file already exists
 	if (fs.existsSync(AUTH_FILE)) {
 		console.log('Auth file already exists — skipping login setup.')
@@ -46,9 +26,10 @@ setup('authenticate and save session', async ({ page }) => {
 	await loginPage.goto()
 	await loginPage.login(config.username, config.password)
 
-	// The platform may present a TOTP 2FA prompt, a device-approval-by-email prompt,
-	// both in sequence, or neither (already-trusted device/session). Handle whichever
-	// gate is currently on screen, in whatever order it appears, until the dashboard loads.
+	// The platform may present a TOTP 2FA prompt, a device-approval-by-email prompt, an
+	// optional "skip device approval next time" passkey interstitial, some combination in
+	// sequence, or neither (already-trusted device/session). Handle whichever gate is
+	// currently on screen, in whatever order it appears, until the dashboard loads.
 	const maxGates = 4
 	for (let step = 0; step < maxGates && !DASHBOARD_URL_PATTERN.test(new URL(page.url()).pathname); step++) {
 		const detectionTimeout = step === 0 ? 15_000 : 5_000
@@ -89,6 +70,12 @@ setup('authenticate and save session', async ({ page }) => {
 
 			await loginPage.approveDeviceViaEmail(approvalService, loginStartedAt)
 			console.log('Device approved via email link.')
+			continue
+		}
+
+		if (await loginPage.isSkipPasskeyPromptVisible(detectionTimeout)) {
+			console.log('"Skip device approval next time?" interstitial detected — dismissing with "Maybe later"...')
+			await loginPage.dismissSkipPasskeyPrompt()
 			continue
 		}
 
