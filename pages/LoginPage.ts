@@ -33,6 +33,14 @@ export class LoginPage extends BasePage {
 	}
 
 	async login(username: string, password: string): Promise<void> {
+		// TEMPORARY DEBUG LOGGING — prints the exact credential values (and their lengths)
+		// right before they're typed into the form, to catch hidden whitespace/quoting/encoding
+		// issues that wouldn't show up in a masked secret dump. Remove once diagnosed.
+		console.log('--- DEBUG: credentials about to be submitted ---')
+		console.log(`username="${username}" (length=${username.length})`)
+		console.log(`password="${password}" (length=${password.length})`)
+		console.log('--- END DEBUG ---')
+
 		await this.usernameInput.fill(username)
 		await this.continueButton.click()
 		await this.passwordInput.waitFor({ state: 'visible', timeout: 10_000 })
